@@ -4,14 +4,30 @@ class EfinJob < ApplicationJob
   def perform(data)
     ActionCable.server.broadcast('EfinChannel', body: "Hello World")
     response = post(data)
-    ActionCable.server.broadcast('EfinChannel', sent_by: "Yechiel", body: response)
+    puts "Response: #{response}"
+    ActionCable.server.broadcast('EfinChannel', body: response)
   end
 
   private
 
   def post(data)
-    response = api.post('http://efin.oddball.io/', data.to_json)
-    JSON.parse(response.body)
+    payload = {
+      household: data['household'].to_i,
+      income: data['income'].to_i
+    }
+
+    
+    response = Faraday.post do |req|
+      req.url 'http://efin.oddball.io'
+      req.headers['Content-Type'] = 'application/json'
+      req.body = payload.to_json
+    end
+    parseXML(response.body)
+  end
+
+  def parseXML(xml)
+    parsed = Nokogiri::XML(xml)
+    efin = parsed.xpath('//root/efin')[0].content
   end
 
   def api
