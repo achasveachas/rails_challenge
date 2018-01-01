@@ -4,7 +4,7 @@ class EfinChannel < ApplicationCable::Channel
     stream_from "EfinChannel"
   end
   def receive(data)
-    ActionCable.server.broadcast('EfinChannel', sent_by: "Yechiel", body: "Hello World")
+    EfinJob.perform_later(data)
   end
 
   def unsubscribed
