@@ -4,7 +4,6 @@ class EfinJob < ApplicationJob
   def perform(data)
     ActionCable.server.broadcast('EfinChannel', body: "Hello World")
     response = post(data)
-    puts "Response: #{response}"
     ActionCable.server.broadcast('EfinChannel', body: response)
   end
 
